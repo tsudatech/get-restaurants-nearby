@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">近隣飲食店検索</string>
+    <string name="initialText">「検索」を押下して近隣の飲食店を検索してください。</string>
+</resources>
