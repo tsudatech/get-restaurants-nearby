@@ -13,12 +13,10 @@ import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
 public class MyLocationListener implements LocationListener {
 
-
     private double lat = 0;
     private double lng = 0;
-    MainActivity activity;
+    private MainActivity activity;
     private int activeFlg = 0;
-
     public MyLocationListener(MainActivity activity){
         this.activity = activity;
     }

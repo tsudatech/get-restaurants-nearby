@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity implements RestaurantAsync.C
     }
 
     private void createProgressBar(){
-        this.m_ProgressDialog = new ProgressDialog(this);
-        this.m_ProgressDialog.setMessage("実行中...");
+        this.m_ProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
+        this.m_ProgressDialog.setMessage("検索中...");
         this.m_ProgressDialog.setCanceledOnTouchOutside(false); // プログレスダイアログ外をタッチできないようにする
         this.m_ProgressDialog.show();
     }
