@@ -14,19 +14,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RestaurantAsync extends AsyncTask<URL, Void, String> {
 
-    private Activity mActivity;
+    private ConfirmAsyncListener confirmAsyncListener;
     private StringBuffer mBuffer = new StringBuffer();
     private static final String TAG = "RestaurantAsync";
 
-    /**
-     * コンストラクタ
-     * @param activity
-     */
-    public RestaurantAsync(Activity activity) {
-        mActivity = activity;
+    public RestaurantAsync(ConfirmAsyncListener confirmAsyncListener) {
+        this.confirmAsyncListener = confirmAsyncListener;
     }
 
     /**
@@ -127,17 +124,17 @@ public class RestaurantAsync extends AsyncTask<URL, Void, String> {
 
                 hotPepperGourmetArray.add(hotPepperGourmet);
             }
-            if ((mActivity instanceof MainActivity) && (mActivity instanceof ConfirmAsyncListener)) {
-                ((MainActivity) mActivity).setHotPepperGourmetArray(hotPepperGourmetArray);
-                ((ConfirmAsyncListener) mActivity).onRestaurantAsyncCallBack();
-            }
+
+            // コールバックメソッド起動
+            confirmAsyncListener.onRestaurantAsyncCallBack(hotPepperGourmetArray);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    // callback用のリスナー
     interface ConfirmAsyncListener {
-        void onRestaurantAsyncCallBack();
+        void onRestaurantAsyncCallBack(List<HotPepperGourmet> hotPepperGourmetArray);
     }
 }

@@ -1,68 +1,59 @@
 package com.example.demoapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.appcompat.widget.Toolbar;
 
-import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+public class MainActivity extends AppCompatActivity{
 
-import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
-
-public class MainActivity extends AppCompatActivity implements RestaurantAsync.ConfirmAsyncListener, ImageGetTask.ImageGetTaskListener, AdapterView.OnItemClickListener{
-
-    private static int arraySize = 10;
-    private int currentCount = 0;
     private TextView textView;
     private GridView gridView;
-    private Bitmap[] images;
-    private ArrayList<HotPepperGourmet> hotPepperGourmetArray;
-    private LocationManager mLocationManager;
-    private MyLocationListener listener;
     private Button button;
     public ProgressDialog m_ProgressDialog;
+    private MainActivity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // GPS
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        listener = new MyLocationListener(this);
-//        boolean gpsFlg = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-//        Log.d("GPS Enabled", gpsFlg ? "OK" : "NG");
+        // ツールバーの設定
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.mipmap.ic_launcher);
+        setSupportActionBar(toolbar);
 
+        // アクティビティの設定
+        activity = this;
+
+        // 各種Viewの取得
         textView = (TextView) findViewById(R.id.textView);
         gridView = (GridView) findViewById(R.id.gridview);
         button = (Button) findViewById(R.id.button);
+
+        // ボタン押下後の処理
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.setActiveFlg(0);
-                images = new Bitmap[arraySize];
-                setCurrentCount(0);
+
+                // プログレスダイアログの表示
                 createProgressBar();
-                callRequestLocationUpdates();
+
+                // メインロジックの起動
+                GetImagesLogic logic = new GetImagesLogic(activity);
+                logic.doMainLogic();
+
             }
         });
     }
 
+    // プログレスダイアログを作成する
     private void createProgressBar(){
         this.m_ProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
         this.m_ProgressDialog.setMessage("検索中...");
@@ -70,79 +61,23 @@ public class MainActivity extends AppCompatActivity implements RestaurantAsync.C
         this.m_ProgressDialog.show();
     }
 
-    private void callRequestLocationUpdates()
-    {
-        //複数プロパイダで処理を回すことで高速化を目指す
-        //removeUpdates()が起動されると全ての並列処理は終了する
-        List<String> providers = mLocationManager.getProviders(true);
-        checkPermission();
-        for (String provider : providers) {
-            mLocationManager.requestLocationUpdates(provider, 500, 1, listener); //リスナの定義は割愛
-        }
+    // プログレスダイアログを消す
+    public void dismissProgressDialog(){
+        this.m_ProgressDialog.dismiss();
     }
 
-    private void checkPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // パーミッションの許可を取得する
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1000);
-        }
+    // textviewにテキストをセットする
+    public void setText(String input){
+        this.textView.setText(input);
     }
 
-    @Override
-    public void onRestaurantAsyncCallBack() {
-        for(int i = 0; i < hotPepperGourmetArray.size(); i++){
-            int imageIndex = i;
-            ImageGetTask task = new ImageGetTask(imageIndex, this);
-            task.executeOnExecutor(THREAD_POOL_EXECUTOR,hotPepperGourmetArray.get(i).getGzUrl());
-        }
-        mLocationManager.removeUpdates(listener);
-        listener.setActiveFlg(0);
+    // gridviewにadapterをセットする
+    public void setAdaptor(BitmapAdapter adaptor){
+        this.gridView.setAdapter(adaptor);
     }
 
-    @Override
-    public void onImageGetTaskCallBack(){
-        BitmapAdapter adapter = new BitmapAdapter(
-                this.getApplicationContext(), R.layout.grid_items,
-                this.images);
-        gridView.setAdapter(adapter);
-        gridView.setOnItemClickListener(this);
-        if(hotPepperGourmetArray.size() > 0)
-            this.textView.setText("");
-        m_ProgressDialog.dismiss();
-
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Uri uri = Uri.parse(hotPepperGourmetArray.get(position).getUrl());
-        Intent i = new Intent(Intent.ACTION_VIEW,uri);
-        startActivity(i);
-    }
-
-    public void addImage(int index, Bitmap image){
-        setCurrentCount(getCurrentCount() + 1);
-        this.images[index] = image;
-    }
-
-    public int getImageSize(){
-        return this.images.length;
-    }
-
-    public void setCurrentCount(int currentCount){
-        this.currentCount = currentCount;
-    }
-
-    public int getCurrentCount(){
-        return this.currentCount;
-    }
-
-    public void setHotPepperGourmetArray(ArrayList<HotPepperGourmet> hotPepperGourmetArray){
-        this.hotPepperGourmetArray = hotPepperGourmetArray;
-    }
-
-    public ArrayList<HotPepperGourmet> getHotPepperGourmetArray(){
-        return this.hotPepperGourmetArray;
+    // gridviewにリスナーをセットする
+    public void setOnItemClickListenerToGridView(AdapterView.OnItemClickListener listener){
+        this.gridView.setOnItemClickListener(listener);
     }
 }

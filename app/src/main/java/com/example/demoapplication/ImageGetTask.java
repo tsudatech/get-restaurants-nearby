@@ -2,6 +2,7 @@ package com.example.demoapplication;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
@@ -11,12 +12,16 @@ import java.net.URL;
 
 public class ImageGetTask extends AsyncTask<String,Void, Bitmap> {
     private int index;
-    private MainActivity activity;
+    private ImageGetTaskListener imageGetTaskListener;
+    private ImagesHolder imagesHolder;
 
-    public ImageGetTask(int index, MainActivity activity) {
+    public ImageGetTask(int index, ImageGetTaskListener imageGetTaskListener, ImagesHolder imagesHolder) {
         this.index = index;
-        this.activity = activity;
+        this.imageGetTaskListener = imageGetTaskListener;
+        this.imagesHolder = imagesHolder;
     }
+
+    // ホットペッパーAPIの画像URLを使って画像を取得する
     @Override
     protected Bitmap doInBackground(String... params) {
         Bitmap image;
@@ -32,13 +37,16 @@ public class ImageGetTask extends AsyncTask<String,Void, Bitmap> {
             return null;
         }
     }
+
+    // コールバックを呼び出す
     @Override
     protected void onPostExecute(Bitmap result) {
-        activity.addImage(this.index, result);
-        if((activity.getImageSize() == activity.getCurrentCount()) && (activity instanceof ImageGetTaskListener))
-            activity.onImageGetTaskCallBack();
+        imagesHolder.addImage(this.index, result);
+        if((imagesHolder.getImageSize() == imagesHolder.getCurrentCount()) && (imageGetTaskListener instanceof ImageGetTaskListener))
+            imageGetTaskListener.onImageGetTaskCallBack();
     }
 
+    // コールバック用のリスナーインターフェース
     interface ImageGetTaskListener {
         void onImageGetTaskCallBack();
     }

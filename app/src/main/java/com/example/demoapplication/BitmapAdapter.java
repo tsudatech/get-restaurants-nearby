@@ -18,6 +18,7 @@ public class BitmapAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private int layoutId;
 
+
     class ViewHolder {
         ImageView imageView;
         TextView textView;
