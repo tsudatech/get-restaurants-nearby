@@ -49,7 +49,7 @@ public class MyLocationListener implements LocationListener {
     // ホットペッパーAPIを呼び出す
     public void requestResutaurantsInfo(LocationService locationService, Double lat, Double lng){
         try {
-            URL url = new URL("http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=3821e6b6d4ce8074&format=json&range=3000m&count=" + Constants.IMAGE_LIST_SIZE + "&lat=" + String.valueOf(lat) + "&lng=" + String.valueOf(lng));
+            URL url = new URL("http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=<アクセスキー>&format=json&range=3000m&count=" + Constants.IMAGE_LIST_SIZE + "&lat=" + String.valueOf(lat) + "&lng=" + String.valueOf(lng));
             System.out.println(url);
             RestaurantAsync.ConfirmAsyncListener confirmAsyncListener = new ConfirmAsyncListenerImpl(activity, locationService);
             new RestaurantAsync(confirmAsyncListener).executeOnExecutor(THREAD_POOL_EXECUTOR,url);
